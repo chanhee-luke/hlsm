@@ -6,9 +6,9 @@ import itertools
 from lgp.abcd.agent import Agent
 from lgp.abcd.repr.state_repr import StateRepr
 
-from lgp.env.alfred.alfred_observation import AlfredObservation
-from lgp.env.alfred.tasks import AlfredTask
-from lgp.env.alfred.alfred_action import AlfredAction, ACTION_TYPES
+from lgp.env.teach.teach_observation import TeachObservation
+from lgp.env.teach.tasks import TeachTask
+from lgp.env.teach.teach_action import TeachAction, ACTION_TYPES
 
 from lgp.models.alfred.handcoded_skills.init_skill import InitSkill
 
@@ -29,14 +29,13 @@ class DemonstrationReplayAgent(Agent):
     def clear_trace(self):
         ...
 
-    def start_new_rollout(self, task: AlfredTask, state_repr: StateRepr = None):
-        api_ish_actions = task.traj_data.get_api_action_sequence()
-        self.actions = [AlfredAction(a["action"], torch.from_numpy(a["mask"]) if a["mask"] is not None else None) for a in api_ish_actions]
+    def start_new_rollout(self, task: TeachTask, state_repr: StateRepr = None):
+        self.actions = task.traj_data.get_api_action_sequence()
         self.current_step = 0
         self.initialized = False
         self.init_skill.start_new_rollout()
 
-    def act(self, observation: AlfredObservation) -> AlfredAction:
+    def act(self, observation: TeachObservation) -> TeachAction:
         # First run the init skill until it stops
         if not self.initialized:
             action = self.init_skill.act(...)
@@ -49,7 +48,7 @@ class DemonstrationReplayAgent(Agent):
         if self.current_step < len(self.actions):
             action = self.actions[self.current_step]
         else:
-            action = AlfredAction("Stop", None)
+            action = TeachAction(action_type="Stop", obj_coord=(None,None), oid=None, action={"action_id":0, "action_idx":0, "action_name": "Stop"})
 
         self.current_step += 1
         return action

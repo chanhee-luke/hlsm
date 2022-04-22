@@ -10,8 +10,8 @@ import json
 #from lgp.abcd.functions.action_repr_function import ActionReprFunction
 
 
-from main.data_collection_strategies.alfred_navigation_chunking_strategy import AlfredNavigationPreproc, NavToGoalChunkingStrategy
-from main.data_collection_strategies.alfred_hl_to_ll_chunking_strategy import AlfredHLPreproc, AlfredHLChunkingStrategy
+from main.data_collection_strategies.teach_navigation_chunking_strategy import TeachNavigationPreproc, NavToGoalChunkingStrategy
+from main.data_collection_strategies.teach_hl_to_ll_chunking_strategy import TeachHLPreproc, TeachHLChunkingStrategy
 
 from lgp.models.alfred.handcoded_skills.init_skill import InitSkill
 
@@ -20,7 +20,7 @@ from lgp.utils.utils import SimpleProfiler
 
 from lgp.rollout.rollout_data import rollouts_to_device
 
-from lgp.factory.alfred_factory import AlfredFactory
+from lgp.factory.teach_factory import TeachFactory
 
 from lgp.rollout import rollout_data
 import lgp.paths
@@ -44,7 +44,7 @@ def collect_universal_rollouts(exp_def, proc_id):
     # Save navigation data to SSD since it produces a LOT of files, but less big in total
     configs = [
         {
-            "preprocessor": AlfredNavigationPreproc(),
+            "preprocessor": TeachNavigationPreproc(),
             "chunker": NavToGoalChunkingStrategy(),
             "dataset_dir": lgp.paths.get_default_navigation_rollout_data_dir(),
             "singles": True,
@@ -52,8 +52,8 @@ def collect_universal_rollouts(exp_def, proc_id):
             "skip_error_rollouts": False
         },
         {
-            "preprocessor": AlfredHLPreproc(),
-            "chunker": AlfredHLChunkingStrategy(),
+            "preprocessor": TeachHLPreproc(),
+            "chunker": TeachHLChunkingStrategy(),
             "dataset_dir": lgp.paths.get_default_subgoal_rollout_data_dir(),
             "singles": False,
             "key": "hl",
@@ -92,7 +92,7 @@ def collect_universal_rollouts(exp_def, proc_id):
         setup["device"] = device
         hparams = Hyperparams(exp_def.get("Hyperparams"))
 
-        factory = AlfredFactory()
+        factory = TeachFactory()
         env = factory.get_environment(setup, task_num_range=numrange)
         agent = factory.get_agent(Hyperparams(setup), hparams)
         model_factory = factory.get_model_factory(setup, hparams)
@@ -107,7 +107,7 @@ def collect_universal_rollouts(exp_def, proc_id):
             state_repr = None
 
             try:
-                observation, task, task_number = env.reset()
+                observation, task, task_number, event = env.reset()
             except StopIteration:
                 break
 
@@ -125,7 +125,11 @@ def collect_universal_rollouts(exp_def, proc_id):
                 action = agent.act(observation)
                 #action_repr = action_repr_func(action, observation)
 
-                next_observation, reward, done, md = env.step(action)
+                next_observation, reward, done, md, event, obj_id = env.step(action)
+
+                # print()
+                # print(f"ROLLOUT obj_id {obj_id}")
+                # print()
 
                 if observation.last_action_error:
                     error_rollout = True
@@ -138,7 +142,9 @@ def collect_universal_rollouts(exp_def, proc_id):
                     #"action_repr": action_repr,
                     "reward": reward,
                     "done": done,
-                    "remark": str(agent)
+                    "remark": str(agent),
+                    "event": event,
+                    "obj_id": obj_id    # None if action is a navigation action
                 }
                 rollout.append(sample)
                 observation = next_observation

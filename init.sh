@@ -2,7 +2,7 @@
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Change this to your desired directory:
-export WS_DIR=${SCRIPT_DIR}/"workspace"
+export WS_DIR=${SCRIPT_DIR}/workspace
 
 # Stuff that ALFRED needs
 export ALFRED_PARENT_DIR=${WS_DIR}/alfred_src

@@ -6,7 +6,148 @@ from imageio import imwrite
 import moviepy.editor as mpy
 from lgp import paths
 from lgp.parameters import Hyperparams
+from pathlib import Path
+import copy
+from lgp.env.teach.dataset.task_THOR import Task_THOR
 
+from lgp.logger import create_logger
+
+logger = create_logger(__name__)
+
+
+def create_task_thor_from_state_diff(state_diff):
+    components = dict()
+    props_to_check = {
+        "isToggled",
+        "isBroken",
+        "isFilledWithLiquid",
+        "isDirty",
+        "isUsedUp",
+        "isCooked",
+        "isOpen",
+        "isPickedUp",
+        "objectType",
+        "simbotLastParentReceptacle",
+        "simbotIsCooked",
+        "simbotIsFilledWithWater",
+        "simbotIsBoiled",
+        "simbotIsFilledWithCoffee",
+        "simbotPickedUp",
+    }
+
+    # The following is to ensure that we're not checking duplicate properties which would result in biases in goal
+    # condition scores
+    prop_overrides = {
+        "simbotPickedUp": ["isPickedUp"],
+        "simbotIsCooked": ["isCooked"],
+        "simbotIsFilledWithWater": ["isFilledWithLiquid"],
+        "simbotIsFilledWithCoffee": ["isFilledWithLiquid"],
+        "simbotIsBoiled": ["isCooked", "simbotIsCooked"],
+    }
+
+    logger.debug("Creating task from state diff ...")
+    for obj_id in state_diff["objects"]:
+        obj_type = get_obj_type_from_oid(obj_id)
+        props_for_task = set(state_diff["objects"][obj_id].keys()).intersection(props_to_check)
+        overridden_props = [
+            prop_overrides[prop]
+            for prop in set(state_diff["objects"][obj_id].keys()).intersection(prop_overrides.keys())
+        ]
+        overridden_props_flat = set([prop for prop_list in overridden_props for prop in prop_list])
+        props_for_task = props_for_task.difference(overridden_props_flat)
+
+        for prop in props_for_task:
+            val = state_diff["objects"][obj_id][prop]
+            # Note that creating a component for each (obj_type, prop, val) combo is fine because task checking will
+            # allow objects to be shared across components
+            key = str((obj_type, prop, val))
+            if key in components:
+                components[key]["determiner"] = int(components[key]["determiner"]) + 1
+            else:
+                components[key] = dict()
+                components[key]["determiner"] = 1
+                components[key]["primary_condition"] = "objectType"
+                components[key]["instance_shareable"] = False
+                components[key]["conditions"] = dict()
+                components[key]["conditions"]["objectType"] = obj_type
+                components[key]["condition_failure_descs"] = dict()
+                components[key]["condition_failure_descs"][prop] = (
+                    str(prop) + " needs to be " + str(val) + " for " + str(obj_type)
+                )
+                if prop == "simbotLastParentReceptacle" and val is not None:
+                    components[key]["conditions"][prop] = val.split("|")[0]
+                else:
+                    components[key]["conditions"][prop] = val
+
+    return Task_THOR(
+        task_id=0,
+        task_name="edh_custom",
+        task_nparams=0,
+        task_params=[],
+        task_anchor_object=None,
+        desc="custom EDH task",
+        components=components,
+        relations=[],
+    )
+
+def get_obj_type_from_oid(oid):
+    parts = oid.split("|")
+    if len(parts) == 4:
+        return parts[0]
+    else:
+        return parts[-1].split("_")[0]
+
+def reduce_float_precision(input_entry, num_places_to_retain=4, keys_to_exclude=None):
+    if keys_to_exclude is None:
+        keys_to_exclude = ["time_start"]
+
+    if issubclass(type(input_entry), dict):
+        output_dict = copy.deepcopy(input_entry)
+        for k, v in input_entry.items():
+            if k in keys_to_exclude:
+                output_dict[k] = v
+            elif type(v) in [dict, list]:
+                output_dict[k] = reduce_float_precision(
+                    v, num_places_to_retain=num_places_to_retain, keys_to_exclude=keys_to_exclude
+                )
+            elif type(v) == float:
+                output_dict[k] = round(v, num_places_to_retain)
+            else:
+                output_dict[k] = v
+        return output_dict
+
+    if type(input_entry) == list:
+        output_list = list()
+        for v in input_entry:
+            if type(v) in [dict, list]:
+                output_list.append(
+                    reduce_float_precision(
+                        v, num_places_to_retain=num_places_to_retain, keys_to_exclude=keys_to_exclude
+                    )
+                )
+            elif type(v) == float:
+                output_list.append(round(v, num_places_to_retain))
+            else:
+                output_list.append(v)
+        return output_list
+
+    raise NotImplementedError("Cannot handle input of type" + str(type(input_entry)))
+
+def save_dict_as_json(data: dict, filepath: str):
+    filepath = Path(filepath)
+
+    try:
+        filepath.parent.mkdir(exist_ok=True)
+    except OSError as e:
+        logger.error(f"Could not create directory: {e}", exc_info=True)
+        raise e
+
+    try:
+        with filepath.open(mode="w") as fp:
+            json.dump(data, fp)
+    except OSError as e:
+        logger.error(f"Could not write file: {e}", exc_info=True)
+        raise e
 
 def save_png(frame, fname):
     #frame = standardize_image(frame, normalize=False)
