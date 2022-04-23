@@ -45,7 +45,7 @@ class TeachEnv(Env):
         if teach_display.startswith(":"):
             teach_display = teach_display[1:]
         #self.thor_env = TEAChController(x_display=teach_display, base_dir=get_settings().AI2THOR_BASE_DIR) #FIXME what is this?
-        self.simulator = simulator_factory.factory.create(simulator_name="thor", web_window_size=900)
+        self.simulator = simulator_factory.factory.create(simulator_name="thor", web_window_size=300)  #NOTE TEACH actually uses 900, using 300 for memory issue
         self.task = None
         self.steps = 0
         self.device = device
