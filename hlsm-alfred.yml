@@ -201,3 +201,6 @@ dependencies:
     - widgetsnbextension==3.5.1
     - wrapt==1.12.1
     - yarl==1.4.2
+    - pydub==0.24.1
+    - pydantic==1.8.2
+    - fuzzywuzzy==0.18.0
