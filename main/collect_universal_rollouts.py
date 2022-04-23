@@ -29,7 +29,7 @@ import lgp.paths
 TOTAL_TASKS = 100000
 START_TASK = 0
 MAX_H = 200
-NUM_GPUS = 3
+NUM_GPUS = 4
 
 PROFILE = False
 
@@ -130,11 +130,11 @@ def collect_universal_rollouts(exp_def, proc_id):
                 action = agent.act(observation)
                 #action_repr = action_repr_func(action, observation)
 
-                next_observation, reward, done, md, next_event, obj_id = env.step(action)
+                next_observation, reward, done, md, next_event, step_success = env.step(action)
 
-                # print()
-                # print(f"ROLLOUT obj_id {obj_id}")
-                # print()
+                # If action is not successful, do not collect rollout for this action
+                if not step_success:
+                    continue
 
                 if observation.last_action_error:
                     error_rollout = True
@@ -148,8 +148,7 @@ def collect_universal_rollouts(exp_def, proc_id):
                     "reward": reward,
                     "done": done,
                     "remark": str(agent),
-                    "event": event,
-                    "obj_id": obj_id    # None if action is a navigation action
+                    "event": event
                 }
                 rollout.append(sample)
                 observation = next_observation
@@ -161,7 +160,7 @@ def collect_universal_rollouts(exp_def, proc_id):
             # ----------------------------------------------------------------------------------------------------------------
 
             # Free up GPU memory - do the rest of the stuff on CPU (which is fine)
-            rollout = rollouts_to_device(rollout, device="cpu")
+            #rollout = rollouts_to_device(rollout, device="cpu")
 
             print()
             print('***Processing rollouts!***')

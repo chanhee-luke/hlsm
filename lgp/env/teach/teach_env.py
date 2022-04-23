@@ -226,7 +226,7 @@ class TeachEnv(Env):
     def step(self, action: TeachAction) -> Tuple[TeachObservation, float, bool, Dict]:
         self.prof.tick("out")
         done = False
-        object_id = None
+        step_success = False
 
         # The ALFRED API does not accept the Stop action, do nothing
         message = ""
@@ -270,47 +270,53 @@ class TeachEnv(Env):
 
         self.prof.tick("step")
 
-        # Track state (pose and inventory) from RGB images and actions
-        event = self.simulator.controller.last_event
-        self.state_tracker.log_action(action)
-        self.state_tracker.log_event(event)
-        #self.state_tracker.log_extra_events(events)
+        # Only process info if step is successful
+        observation = None
+        reward = -1
+        md = None
+        event = None
+        if step_success:
+            # Track state (pose and inventory) from RGB images and actions
+            event = self.simulator.controller.last_event
+            self.state_tracker.log_action(action)
+            self.state_tracker.log_event(event)
+            #self.state_tracker.log_extra_events(events)
 
-        observation = self.state_tracker.get_observation()
-        observation.privileged_info.attach_task(self.task) # TODO: See if we can get rid of this?
-        if self.device:
-            observation = observation.to(self.device)
+            observation = self.state_tracker.get_observation()
+            observation.privileged_info.attach_task(self.task) # TODO: See if we can get rid of this?
+            if self.device:
+                observation = observation.to(self.device)
 
-        # Rewards and progress tracking metadata
-        if not self.task.traj_data.is_test():
-            (
-                _,
-                task_success,
-                _,
-                final_goal_conditions_total,
-                final_goal_conditions_satisfied,
-            ) = self.simulator.check_episode_progress(self.task.get_task_def())
+            # Rewards and progress tracking metadata
+            if not self.task.traj_data.is_test():
+                (
+                    _,
+                    task_success,
+                    _,
+                    final_goal_conditions_total,
+                    final_goal_conditions_satisfied,
+                ) = self.simulator.check_episode_progress(self.task.get_task_def())
 
-            #NOTE in EDH, goal-condition and subgoal are the same
-            goal_satisfied = final_goal_conditions_satisfied
-            goal_conditions_met = final_goal_conditions_satisfied
-            task_success = goal_satisfied
-            md = {
-                "success": task_success,
-                "goal_satisfied": goal_satisfied,
-                "goal_conditions_met": goal_conditions_met,
-                "message": message,
-            }
-        else:
-            reward = 0
-            md = {}
+                #NOTE in EDH, goal-condition and subgoal are the same
+                goal_satisfied = final_goal_conditions_satisfied
+                goal_conditions_met = final_goal_conditions_satisfied
+                task_success = goal_satisfied
+                md = {
+                    "success": task_success,
+                    "goal_satisfied": goal_satisfied,
+                    "goal_conditions_met": goal_conditions_met,
+                    "message": message,
+                }
+            else:
+                reward = 0
+                md = {}
 
-        # This is used to generate leaderboard replay traces:
-        md["api_action"] = api_action
+            # This is used to generate leaderboard replay traces:
+            md["api_action"] = api_action
 
-        self.steps += 1
+            self.steps += 1
 
-        self.prof.tick("proc")
-        self.prof.loop()
-        self.prof.print_stats(20)
-        return observation, reward, done, md, event, object_id
+            self.prof.tick("proc")
+            self.prof.loop()
+            self.prof.print_stats(20)
+        return observation, reward, done, md, event, step_success
