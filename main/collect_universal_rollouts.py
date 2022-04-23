@@ -130,7 +130,7 @@ def collect_universal_rollouts(exp_def, proc_id):
                 action = agent.act(observation)
                 #action_repr = action_repr_func(action, observation)
 
-                next_observation, reward, done, md, event, obj_id = env.step(action)
+                next_observation, reward, done, md, next_event, obj_id = env.step(action)
 
                 # print()
                 # print(f"ROLLOUT obj_id {obj_id}")
@@ -153,6 +153,7 @@ def collect_universal_rollouts(exp_def, proc_id):
                 }
                 rollout.append(sample)
                 observation = next_observation
+                event = next_event
 
                 if action.is_stop():
                     break
@@ -161,6 +162,10 @@ def collect_universal_rollouts(exp_def, proc_id):
 
             # Free up GPU memory - do the rest of the stuff on CPU (which is fine)
             rollout = rollouts_to_device(rollout, device="cpu")
+
+            print()
+            print('***Processing rollouts!***')
+            print()
 
             for config in configs:
                 movement_stack = []
