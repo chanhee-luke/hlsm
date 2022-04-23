@@ -66,4 +66,9 @@ class TeachHLChunkingStrategy:
             sample_out["eventual_action_ll"] = samples[-1]["action"]
             sample_out["eventual_action_observation"] = last_observation
             rollout_out.append(sample_out)
+        
+        #NOTE possible bug in the simulator
+        if subgoal == None:
+            return None
+
         return rollout_out

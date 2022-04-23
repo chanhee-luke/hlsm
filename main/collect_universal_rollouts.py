@@ -178,11 +178,18 @@ def collect_universal_rollouts(exp_def, proc_id):
                         # Consider the preceding sequence of navigation actions to be either the result of exploration or
                         # ... part of the manipulation itself
                         chunked_samples = config["chunker"].ll_to_hl(movement_stack, start_idx=InitSkill.sequence_length() if first else 0)
+                        
+                        # Possible bug in the simulator, cut this instance short
+                        if chunked_samples == None:
+                            movement_stack.clear()
+                            first = False
+                            break
+
                         if config["chunker"].include_chunk(sample["action"]):
                             chunked_rollout.extend(chunked_samples)
                         movement_stack.clear()
                         first = False
-
+                
                 chunked_rollout = config["preprocessor"].process(chunked_rollout)
 
                 if error_rollout and config["skip_error_rollouts"]:
@@ -197,7 +204,7 @@ def collect_universal_rollouts(exp_def, proc_id):
                         rollout_data.save_rollout(chunked_rollout, config["dataset_dir"], task_number)
                         prof.loop()
                         prof.print_stats(1)
-
+            
             # ----------------------------------------------------------------------------------------------------------------
             #### Save progress
             progress["collected_rollouts"].append(task_number)

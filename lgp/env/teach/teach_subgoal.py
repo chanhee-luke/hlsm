@@ -19,7 +19,7 @@ from lgp.ops.misc import index_to_onehot
 from lgp.utils.viz import show_image
 from lgp.flags import GLOBAL_VIZ
 
-import torch
+import torch, cv2
 
 import sys, pdb
 
@@ -186,19 +186,32 @@ class TeachSubgoal(Subgoal, Task):
         oid = action.oid
 
         # oid is part of a slice of an object
-        if oid not in event.instance_masks:
-            oid = '|'.join(oid.split("|")[:-1])   # Get rid of the last part, which refers to the specific slice object
+        if oid not in event.instance_masks:                    # e.g. oid = Potato|-01.61|+00.94|-02.04|PotatoSliced_4
+            oid_stem_nocoord = '|'.join(oid.split("|")[:-1])   # e.g. Potato|-01.61|+00.94|-02.04|
+            oid_stem = oid.split("|")[0]                       # e.g. Potato
             for key in event.instance_masks.keys():
-                if oid in key:
+                if oid_stem_nocoord in key:
                     print()
-                    print(f"***Oid does not exist in environment! Using {key} instead of {oid} for action {action.api_action}***")
+                    print(f"***Oid does not exist in environment! Using {oid_stem_nocoord}, {key} instead of {oid} for action {action.api_action}***")
                     print()
                     oid = key
                     break
-        
-        # Sanity check
+                elif oid_stem in key:
+                    print()
+                    print(f"***Oid does not exist in environment! Using {oid_stem}, {key} instead of {oid} for action {action.api_action}***")
+                    print()
+                    oid = key
+                    break
+
+        #NOTE Sanity check, possible bug in the simulator setup
         if oid not in event.instance_masks:
-            raise ValueError(f"{oid} does not exist in the environment! Check if trajectory is parsed correctly")
+            print(event.instance_masks.keys())
+            #for o in event.metadata["objects"]:
+            #    print(o["objectId"], o["visible"], o["position"])
+            cv2.imwrite(f"error_{oid}.png", event.frame)
+            print((f"{oid} for {action.api_action} does not exist in the environment! Cutting this instance short..."))
+            return None, None
+            #raise ValueError(f"{oid} for {action.api_action} does not exist in the environment! Check if the trajectory is parsed correctly")
 
         argmask = torch.tensor(event.instance_masks[oid])
 
@@ -216,6 +229,11 @@ class TeachSubgoal(Subgoal, Task):
         type_str = action.type_str()
         # Argument class
         arg_id, argmask = cls.extract_touch_argument(action, observation, event)
+        
+        #NOTE Possible bug in the simulator setup
+        if arg_id == None:
+            return None 
+
         # Spatial argument mask
         argument_mask_2d = argmask
         if argument_mask_2d is not None:

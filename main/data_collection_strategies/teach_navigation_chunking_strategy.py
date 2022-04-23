@@ -94,6 +94,10 @@ class NavToGoalChunkingStrategy:
                 subgoal = TeachSubgoal.from_type_str_and_arg_id("Stop", -1)
             else:
                 subgoal = TeachSubgoal.from_action_and_observation(last_action, last_observation, last_event)
+            
+            #NOTE possible bug in the simulator
+            if subgoal == None:
+                return None
 
             # State image for later visualizing
             state_image = samples[t]["state_repr"].represent_as_image(topdown2d=True)
