@@ -1,4 +1,4 @@
-name: hlsm-alfred
+name: hlsm-teach
 channels:
   - pytorch
   - defaults
@@ -42,7 +42,7 @@ dependencies:
   - zstd=1.4.4=h0b5b093_3
   - pip:
     - absl-py==0.11.0
-    - ai2thor==2.1.0
+    - ai2thor==3.1.0
     - aiohttp==3.6.2
     - argon2-cffi==20.1.0
     - astar==0.9
@@ -202,3 +202,6 @@ dependencies:
     - widgetsnbextension==3.5.1
     - wrapt==1.12.1
     - yarl==1.4.2
+    - pydub==0.24.1
+    - pydantic==1.8.2
+    - fuzzywuzzy==0.18.0
