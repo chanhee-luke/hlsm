@@ -66,7 +66,8 @@ def collect_universal_rollouts(exp_def, proc_id):
         "chunk_numbers": {
             "hl": 0,
             "nav": 0
-        }
+        },
+        "collected_task_ids": []
     }
     progress_log_file = os.path.join(lgp.paths.get_default_rollout_data_dir(), f"progress_log.json")
 
@@ -113,10 +114,14 @@ def collect_universal_rollouts(exp_def, proc_id):
 
             # Skip already collected rollouts
             if task_number in progress["collected_rollouts"]:
-                print(f"Skipping rollout: {task_number} - it exists")
+                print()
+                print(f"Skipping rollout: {task_number}, {task.get_task_id()} - it exists")
+                print()
                 continue
             else:
-                print(f"Collecting rollout: {task_number}")
+                print()
+                print(f"Collecting rollout: {task_number}, {task.get_task_id()}")
+                print()
 
             agent.start_new_rollout(task)
 
@@ -192,6 +197,7 @@ def collect_universal_rollouts(exp_def, proc_id):
             # ----------------------------------------------------------------------------------------------------------------
             #### Save progress
             progress["collected_rollouts"].append(task_number)
+            progress["collected_task_ids"].append(task.get_task_id())
             progress["current_i"] = i+1
             with open(progress_log_file, "w") as fp:
                 json.dump(progress, fp)

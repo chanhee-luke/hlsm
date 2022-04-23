@@ -187,21 +187,19 @@ class TeachSubgoal(Subgoal, Task):
 
         # oid is part of a slice of an object
         if oid not in event.instance_masks:
+            oid = '|'.join(oid.split("|")[:-1])   # Get rid of the last part, which refers to the specific slice object
             for key in event.instance_masks.keys():
                 if oid in key:
-                    oid = key
                     print()
                     print(f"***Oid does not exist in environment! Using {key} instead of {oid} for action {action.api_action}***")
                     print()
+                    oid = key
                     break
+        
+        # Sanity check
+        if oid not in event.instance_masks:
+            raise ValueError(f"{oid} does not exist in the environment! Check if trajectory is parsed correctly")
 
-        # if action.oid != obj_id:
-        #     print(f"***Mismatch between oids {action.oid} and {obj_id} for action{str(action)}***")
-        #     print("Using obj id from coordinate")
-        #     oid = obj_id
-        # print()
-        # print(f"action {action.api_action} with oid {oid}")
-        # print()
         argmask = torch.tensor(event.instance_masks[oid])
 
         if argmask is None:
