@@ -46,7 +46,6 @@ class TeachHLChunkingStrategy:
         last_action = samples[-1]["action"]
         last_observation = samples[-1]["observation"]
         last_event = samples[-1]["event"]
-        last_obj_id = samples[-1]["obj_id"]
 
         # Stop action doesn't have any navigation preceding it
         if last_action.is_stop():
@@ -61,7 +60,7 @@ class TeachHLChunkingStrategy:
             assert self.is_sequence_terminal(last_action), (
                 "Last action is high-level sequence should be either manipulation or stop")
 
-            subgoal = TeachSubgoal.from_action_and_observation(last_action, last_observation, last_event, last_obj_id)
+            subgoal = TeachSubgoal.from_action_and_observation(last_action, last_observation, last_event)
             sample_out = copy.deepcopy(samples[start_idx])
             sample_out["subgoal"] = subgoal
             sample_out["eventual_action_ll"] = samples[-1]["action"]

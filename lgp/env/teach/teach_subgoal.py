@@ -180,7 +180,7 @@ class TeachSubgoal(Subgoal, Task):
         return cls.from_type_and_arg_id(type_id, arg_id)
 
     @classmethod
-    def extract_touch_argument(cls, action, observation, event, obj_id):
+    def extract_touch_argument(cls, action, observation, event):
         # B x C x W x L x H
         # state_repr = batch["states"][t]
         oid = action.oid
@@ -211,11 +211,11 @@ class TeachSubgoal(Subgoal, Task):
         return argclass, argmask
 
     @classmethod
-    def from_action_and_observation(cls, action: TeachAction, observation: TeachObservation, event, obj_id):
+    def from_action_and_observation(cls, action: TeachAction, observation: TeachObservation, event):
         # Action type
         type_str = action.type_str()
         # Argument class
-        arg_id, argmask = cls.extract_touch_argument(action, observation, event, obj_id)
+        arg_id, argmask = cls.extract_touch_argument(action, observation, event)
         # Spatial argument mask
         argument_mask_2d = argmask
         if argument_mask_2d is not None:

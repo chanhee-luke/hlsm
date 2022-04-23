@@ -45,7 +45,6 @@ class NavToGoalChunkingStrategy:
         last_action = samples[-1]["action"]
         last_observation = samples[-1]["observation"]
         last_event = samples[-1]["event"]
-        last_obj_id = samples[-1]["obj_id"]
 
         # 1. Construct a sequence of 2D feature inputs containing:
         #   - Obstacle Map
@@ -94,7 +93,7 @@ class NavToGoalChunkingStrategy:
             if last_action.is_stop():
                 subgoal = TeachSubgoal.from_type_str_and_arg_id("Stop", -1)
             else:
-                subgoal = TeachSubgoal.from_action_and_observation(last_action, last_observation, last_event, last_obj_id)
+                subgoal = TeachSubgoal.from_action_and_observation(last_action, last_observation, last_event)
 
             # State image for later visualizing
             state_image = samples[t]["state_repr"].represent_as_image(topdown2d=True)
