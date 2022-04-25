@@ -1,6 +1,6 @@
 {
   "@include": [
-    "alfred/env"
+    "teach/env"
   ],
 
   "Setup": {
@@ -10,10 +10,10 @@
     "num_workers": 0,
 
     "load_model_file": null,
-    "save_model_file": "alfred_hlsm_subgoal_model",
-    "save_checkpoint_file": "alfred_hlsm_subgoal_model",
+    "save_model_file": "teach_hlsm_subgoal_model",
+    "save_checkpoint_file": "teach_hlsm_subgoal_model",
     "load_checkpoint_file": null,
-    "experiment_name": "train_alfred_subgoal_model",
+    "experiment_name": "train_teach_subgoal_model",
 
     "dataset_type" : "subgoals",
     "model_type": "alfred_subgoal_model",
