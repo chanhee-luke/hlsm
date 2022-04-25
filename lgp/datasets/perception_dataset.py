@@ -7,6 +7,8 @@ from lgp.abcd.dataset import ExtensibleDataset
 from lgp.env.teach.teach_observation import TeachObservation
 from lgp.rollout.rollout_data import load_rollout_from_path
 
+from lgp.env.teach.teach_subgoal import IDX_TO_ACTION_IDX
+
 import torch
 
 

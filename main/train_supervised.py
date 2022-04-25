@@ -114,7 +114,7 @@ def train_main(exp_def: Dict):
         if load_model_file is not None:
             print(f"LOADING MODEL FROM: {load_model_file}")
             # I think this is initializing the cuda context?
-            model.load_state_dict(torch.load(load_model_file))
+            model.load_state_dict(torch.load(resolve_model_path(load_model_file)))
 
     model = model.to(device)
 
