@@ -45,15 +45,15 @@ def make_dataloader(data_or_paths, dataset_mode, cls, env_type, hparams, batch_s
 
 
 def get_incl_task_indices(env_setup):
-    from lgp.env.alfred.tasks import AlfredTask
+    from lgp.env.teach.tasks import TeachTask
     data_splits = env_setup['data_splits']
     allowed_types = env_setup['filter_task_types']
     include_rollout_indices = []
     if len(allowed_types) > 0:
-        task_filter = AlfredTask.make_task_type_filter(allowed_types)
+        task_filter = TeachTask.make_task_type_filter(allowed_types)
     else:
         task_filter = lambda m: True
-    for i, (alfred_task, task_id) in enumerate(AlfredTask.iterate_all_tasks(data_splits, task_filter=task_filter)):
+    for i, (teach_task, task_id) in enumerate(TeachTask.iterate_all_tasks(data_splits, task_filter=task_filter)):
         include_rollout_indices.append(task_id)
     return include_rollout_indices
 
