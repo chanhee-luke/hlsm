@@ -1,6 +1,6 @@
 {
   "@include": [
-    "alfred/env"
+    "teach/env"
   ],
 
   "Setup": {
@@ -14,7 +14,7 @@
     "save_checkpoint_file": "hlsm_gofor_navigation_model",
     "load_checkpoint_file": null,
 
-    "experiment_name": "train_alfred_spatial_navigation_model",
+    "experiment_name": "train_teach_spatial_navigation_model",
 
     "dataset_type" : "navigation",
     "model_type": "alfred_spatial_navigation_model",
