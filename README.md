@@ -1,5 +1,5 @@
 # HLSM-Teach
-This is the code repository for the paper [A Persistent Spatial Semantic Representation for High-level Natural Language Instruction Execution](https://arxiv.org/abs/2107.05612). Adapted to TEACH
+This is the code repository for the paper [A Persistent Spatial Semantic Representation for High-level Natural Language Instruction Execution](https://arxiv.org/abs/2107.05612). Adapted to TEACH.
 
 ## Setup
 
