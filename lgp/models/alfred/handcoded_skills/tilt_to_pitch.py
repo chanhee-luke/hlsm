@@ -3,7 +3,7 @@ import math
 
 from lgp.abcd.skill import Skill
 from lgp.models.alfred.hlsm.hlsm_state_repr import AlfredSpatialStateRepr
-from lgp.env.alfred.alfred_action import AlfredAction
+from lgp.env.teach.teach_action import TeachAction
 
 
 DEBUG_DISABLE_PITCHING = False
@@ -38,10 +38,10 @@ class TiltToPitchSkill(Skill):
     def has_failed(self) -> bool:
         return False
 
-    def act(self, state_repr : AlfredSpatialStateRepr) -> AlfredAction:
+    def act(self, state_repr : AlfredSpatialStateRepr) -> TeachAction:
         # Debug what happens if we disable pitching
         if DEBUG_DISABLE_PITCHING:
-            return AlfredAction(action_type="Stop", argument_mask=AlfredAction.get_empty_argument_mask())
+            return TeachAction(action_type="Stop", argument_mask=TeachAction.get_empty_argument_mask())
 
         pitch = state_repr.get_camera_pitch_deg()
         pitch = math.radians(pitch)
@@ -54,16 +54,16 @@ class TiltToPitchSkill(Skill):
 
         # Rotate to the correct angle
         if ctrl_diff < -step_size/2:
-            action_type = "LookDown"
+            action_type = "Look Down"
         elif ctrl_diff > step_size/2:
-            action_type = "LookUp"
+            action_type = "Look Up"
         else:
             action_type = "Stop"
 
         # Sometimes tilting gets stuck due to collisions. This is to abort tilting and avoid getting stuck in an infinte loop.
-        if action_type in ["LookDown", "LookUp"] and self.last_diff == ctrl_diff:
+        if action_type in ["Look Down", "Look Up"] and self.last_diff == ctrl_diff:
             print("TiltToPitch: Seems to be stuck. Stopping!")
             action_type = "Stop"
         self.last_diff = ctrl_diff
 
-        return AlfredAction(action_type=action_type, argument_mask=AlfredAction.get_empty_argument_mask())
+        return TeachAction(action_type=action_type, argument_mask=TeachAction.get_empty_argument_mask())

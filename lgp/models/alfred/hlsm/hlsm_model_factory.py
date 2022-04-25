@@ -55,13 +55,14 @@ class HlsmModelFactory(ModelFactory):
         init_skill = InitSkill()
 
         skillset = {
-            "OpenObject" : interact_skill,
-            "CloseObject" : interact_skill,
-            "PickupObject" : interact_skill,
-            "PutObject" : interact_skill,
-            "ToggleObjectOn" : interact_skill,
-            "ToggleObjectOff" : interact_skill,
-            "SliceObject" : interact_skill,
+            "Open" : interact_skill,
+            "Close" : interact_skill,
+            "Pickup" : interact_skill,
+            "Place" : interact_skill,
+            "ToggleOn" : interact_skill,
+            "ToggleOff" : interact_skill,
+            "Slice" : interact_skill,
+            "Pour" : interact_skill,
 
             # This does not correspond to any high-level actions:
             "init": init_skill

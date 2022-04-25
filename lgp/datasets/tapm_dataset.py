@@ -7,7 +7,7 @@ from lgp.abcd.model_factory import ModelFactory
 from lgp.abcd.dataset import ExtensibleDataset
 from lgp.rollout.rollout_data import load_rollout_from_path
 
-from lgp.env.alfred.alfred_subgoal import AlfredSubgoal
+from lgp.env.teach.teach_subgoal import TeachSubgoal, IDX_TO_ACTION_IDX
 
 from lgp.models.alfred.hlsm.hlsm_state_repr import AlfredSpatialStateRepr
 
@@ -45,6 +45,14 @@ class TapmDataset(ExtensibleDataset):
     def __getitem__(self, i):
         rollout = load_rollout_from_path(self.rollout_paths[i])
         rollout = rollout[:MAX_LEN] # Clip to max length of 10 for now
+        # print("from", MAX_LEN)
+        # print(rollout)
+        # print(rollout[0]["subgoal"].action_type)
+        for roll in rollout:
+            # print(roll["subgoal"].action_type)
+            roll["subgoal"].action_type = torch.tensor([IDX_TO_ACTION_IDX[int(roll["subgoal"].action_type.item())]]) #FIXME tmp mapping
+        # print(rollout[0]["subgoal"].action_type)
+        # print("here")
         if len(rollout) == 0:
             print("SKIPPING EMPTY ROLLOUT")
             return self.__getitem__(i+1)
@@ -74,7 +82,7 @@ class TapmDataset(ExtensibleDataset):
         # Fix bug if last action is not stop
         if len(rollout) > 0 and (not rollout[-1]["subgoal"].is_stop()):
             rollout[-1] = copy.deepcopy(rollout[-1])
-            rollout[-1]["subgoal"] = AlfredSubgoal.from_type_str_and_arg_id("Stop", -1)
+            rollout[-1]["subgoal"] = TeachSubgoal.from_type_str_and_arg_id("Stop", -1)
 
         # Drop explore actions
         if DROP_EXPLORE:
@@ -189,12 +197,23 @@ class TapmDataset(ExtensibleDataset):
 
         tasks = [l["task"] for l in list_of_examples]
         task_reprs = self.task_repr_function(tasks)
+
         states_preproc = [l["state_preproc"] for l in list_of_examples]
         states = [l["state_repr"] for l in list_of_examples]
         #action_reprs_hl = [l["action_repr_hl"] if "action_repr_hl" in l else l["action_repr_NOPE"] for l in
         #                   list_of_examples]
         subgoals = [l["subgoal"] for l in list_of_examples]
         rollout_indices = [l["rollout_index"] for l in list_of_examples]
+
+        # print("***")
+        # print(subgoals)
+        # for subgoal in subgoals:
+        #     print(subgoal.action_type.item())
+        #     print(type(subgoal.action_type.item()))
+        #     print(IDX_TO_ACTION_IDX[int(subgoal.action_type.item())])
+        #     subgoal.action_type = torch.Tensor([IDX_TO_ACTION_IDX[int(subgoal.action_type.item())]])
+        #     print(subgoal.action_type)
+        # print("***")
 
         # Build a list indicating which batch element each sample belongs to.
         batch_id = self._calc_batch_id_list(rollout_indices)
@@ -214,7 +233,7 @@ class TapmDataset(ExtensibleDataset):
         #for arg, act in zip(semantic_action_args, subgoals):
         #    subgoal = AlfredSubgoal.from_type_str_arg_id_with_mask(act.action_type, arg, act.argument_mask.data)
         #    subgoals.append(subgoal)
-        subgoals = AlfredSubgoal.collate(subgoals)
+        subgoals = TeachSubgoal.collate(subgoals)
 
         states_preproc = torch.cat(states_preproc, dim=0)
         states = AlfredSpatialStateRepr.collate(states)

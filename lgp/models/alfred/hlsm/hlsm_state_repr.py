@@ -8,10 +8,10 @@ from lgp.abcd.repr.state_repr import StateRepr
 
 from lgp.ops.misc import padded_roll_2d
 
-from lgp.env.alfred.segmentation_definitions import intid_tensor_to_rgb, object_string_to_intid
-import lgp.env.alfred.segmentation_definitions as segdef
+from lgp.env.teach.segmentation_definitions import intid_tensor_to_rgb, object_string_to_intid
+import lgp.env.teach.segmentation_definitions as segdef
 from lgp.models.alfred.voxel_grid import VoxelGrid
-from lgp.env.alfred.alfred_observation import AlfredObservation
+from lgp.env.teach.teach_observation import TeachObservation
 
 from lgp.flags import TALL_GRID
 
@@ -37,12 +37,12 @@ class AlfredSpatialStateRepr(StateRepr):
                  data: VoxelGrid,
                  obs_mask: VoxelGrid,
                  vector: torch.tensor,
-                 observation: Union[AlfredObservation, None]):
+                 observation: Union[TeachObservation, None]):
         super().__init__()
         self.data : VoxelGrid = data
         self.obs_mask : VoxelGrid = obs_mask
         self.inventory_vector : torch.tensor = vector
-        self.observation : Union[AlfredObservation, None] = observation
+        self.observation : Union[TeachObservation, None] = observation
         self.annotations = {}
 
     def to(self, device):
@@ -267,7 +267,7 @@ class AlfredSpatialStateRepr(StateRepr):
         datas = VoxelGrid.collate([s.data for s in states])
         obs_masks = VoxelGrid.collate([s.obs_mask for s in states])
         vectors = torch.cat([s.inventory_vector for s in states], dim=0)
-        observation = (AlfredObservation.collate([s.observation for s in states])
+        observation = (TeachObservation.collate([s.observation for s in states])
                        if next(iter(states)).observation is not None else None)
         return cls(datas, obs_masks, vectors, observation)
 

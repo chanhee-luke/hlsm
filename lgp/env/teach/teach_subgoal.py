@@ -36,30 +36,115 @@ class ForkedPdb(pdb.Pdb):
         finally:
             sys.stdin = _stdin
 
+# Original mapping, need to change!
+# IDX_TO_ACTION_TYPE_OG = {
+#     0: 'Stop',
+#     2: 'Forward',
+#     3: 'Backward',
+#     4: 'Turn Left',
+#     5: 'Turn Right',
+#     6: 'Look Up',
+#     7: 'Look Down',
+#     8: 'Pan Left',
+#     9: 'Pan Right',
+#     200: 'Pickup',
+#     201: 'Place',
+#     202: 'Open',
+#     203: 'Close',
+#     204: 'ToggleOn',
+#     205: 'ToggleOff',
+#     206: 'Slice',
+#     211: 'Pour'
+# }
+
+# IDX_TO_ACTION_TYPE_MAP = {
+#     0: 'Stop',
+#     1: 'Forward',
+#     2: 'Backward',
+#     3: 'Turn Left',
+#     4: 'Turn Right',
+#     5: 'Look Up',
+#     6: 'Look Down',
+#     7: 'Pan Left',
+#     8: 'Pan Right',
+#     9: 'Pickup',
+#     10: 'Place',
+#     11: 'Open',
+#     12: 'Close',
+#     13: 'ToggleOn',
+#     14: 'ToggleOff',
+#     15: 'Slice',
+#     16: 'Pour'
+# }
+
+# IDX_TO_ACTION_TYPE = {
+#     0: IDX_TO_ACTION_TYPE_MAP[0],
+#     2: IDX_TO_ACTION_TYPE_MAP[1],
+#     3: IDX_TO_ACTION_TYPE_MAP[2],
+#     4: IDX_TO_ACTION_TYPE_MAP[3],
+#     5: IDX_TO_ACTION_TYPE_MAP[4],
+#     6: IDX_TO_ACTION_TYPE_MAP[5],
+#     7: IDX_TO_ACTION_TYPE_MAP[6],
+#     8: IDX_TO_ACTION_TYPE_MAP[7],
+#     9: IDX_TO_ACTION_TYPE_MAP[8],
+#     200: IDX_TO_ACTION_TYPE_MAP[9],
+#     201: IDX_TO_ACTION_TYPE_MAP[10],
+#     202: IDX_TO_ACTION_TYPE_MAP[11],
+#     203: IDX_TO_ACTION_TYPE_MAP[12],
+#     204: IDX_TO_ACTION_TYPE_MAP[13],
+#     205: IDX_TO_ACTION_TYPE_MAP[14],
+#     206: IDX_TO_ACTION_TYPE_MAP[15],
+#     211: IDX_TO_ACTION_TYPE_MAP[16]
+# }
+
+IDX_TO_ACTION_IDX = {
+    0: 0,
+    2: 1,
+    3: 2,
+    4: 3,
+    5: 4,
+    6: 5,
+    7: 6,
+    8: 7,
+    9: 8,
+    200: 9,
+    201: 10,
+    202: 11,
+    203: 12,
+    204: 13,
+    205: 14,
+    206: 15,
+    211: 16
+}
+
 IDX_TO_ACTION_TYPE = {
     0: 'Stop',
-    2: 'Forward',
-    3: 'Backward',
-    4: 'Turn Left',
-    5: 'Turn Right',
-    6: 'Look Up',
-    7: 'Look Down',
-    8: 'Pan Left',
-    9: 'Pan Right',
-    200: 'Pickup',
-    201: 'Place',
-    202: 'Open',
-    203: 'Close',
-    204: 'ToggleOn',
-    205: 'ToggleOff',
-    206: 'Slice',
-    211: 'Pour'
+    1: 'Forward',
+    2: 'Backward',
+    3: 'Turn Left',
+    4: 'Turn Right',
+    5: 'Look Up',
+    6: 'Look Down',
+    7: 'Pan Left',
+    8: 'Pan Right',
+    9: 'Pickup',
+    10: 'Place',
+    11: 'Open',
+    12: 'Close',
+    13: 'ToggleOn',
+    14: 'ToggleOff',
+    15: 'Slice',
+    16: 'Pour'
 }
 
 # TODO: Reinstate Stop action as an action type
 
+# ACTION_TYPE_TO_IDX_MAP = {v:k for k,v in IDX_TO_ACTION_TYPE_MAP.items()}
+# ACTION_TYPE_TO_IDX = {v:ACTION_TYPE_TO_IDX_MAP[v] for k,v in IDX_TO_ACTION_TYPE.items()}
+# ACTION_TYPES = [IDX_TO_ACTION_TYPE_MAP[i] for i in range(len(IDX_TO_ACTION_TYPE))] #list(IDX_TO_ACTION_TYPE.values())
+
 ACTION_TYPE_TO_IDX = {v:k for k,v in IDX_TO_ACTION_TYPE.items()}
-ACTION_TYPES = list(IDX_TO_ACTION_TYPE.values())#[IDX_TO_ACTION_TYPE[i] for i in range(len(IDX_TO_ACTION_TYPE))]
+ACTION_TYPES = [IDX_TO_ACTION_TYPE[i] for i in range(len(IDX_TO_ACTION_TYPE))]
 
 NAV_ACTION_TYPES = [
     'Forward',
@@ -128,7 +213,8 @@ class TeachSubgoal(Subgoal, Task):
 
         for i, arg_mask in enumerate(arg_masks):
             if arg_mask is None:
-                arg_masks[i] = VoxelGrid.create_empty(device=arg_masks[0].data.device)
+                # arg_masks[i] = VoxelGrid.create_empty(device=arg_masks[0].data.device)
+                arg_masks[i] = VoxelGrid.create_empty(device="cuda")
         arg_masks = VoxelGrid.collate(arg_masks)
         return TeachSubgoal(act_types, arg_vectors, arg_masks)
 
@@ -266,7 +352,7 @@ class TeachSubgoal(Subgoal, Task):
     def action_type_intid_to_str(cls, action_type_intid : int) -> str:
         return IDX_TO_ACTION_TYPE[action_type_intid]
 
-    def to_tensor(self, device="cpu", dtype=torch.int64):
+    def to_tensor(self, device="cuda", dtype=torch.int64):
         "Returns a Bx2 tensor where [0][0] is type id from 0 to 13, and [0][1] is arg_intid from -1 to 123"
         if len(self.action_type) == 1:
             type_id = self.type_intid()
@@ -320,19 +406,15 @@ class TeachSubgoal(Subgoal, Task):
     def get_argument_mask(self) -> torch.tensor:
         return self.argument_mask.data.data
 
-    def build_spatial_arg_proposal(self, state_repr: "TeachSpatialStateRepr"):
+    def build_spatial_arg_proposal(self, state_repr: "AlfredSpatialStateRepr"):
         #raise Exception("Should this actually be called?")
         #assert self.argument_mask is None, "Why build arg proposal if mask is already there?"
         # Locate the desired object in the voxel grid and produce a mask
         state_grid = state_repr.data.data
         # The 0th channel in argument_vector corresponds to the "no argument"
-        #ForkedPdb().set_trace()
-        device = "cuda:0"
-        state_grid = state_grid.type(self.argument_vector.dtype)
-        self.argument_vector = self.argument_vector.to(device)
         spatial_argument = torch.einsum("bc,bcwlh->bwlh", self.argument_vector[:, 1:], state_grid.type(self.argument_vector.dtype))
         spatial_argument = spatial_argument[:, None, :, :, :]
-        return spatial_argument.to("cpu")
+        return spatial_argument
 
     def to_action(self, state_repr, observation: TeachObservation, return_intermediates=False) -> TeachAction:
         assert self.action_type.shape[0] == 1, "Can't convert a batch to action"

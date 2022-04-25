@@ -2,14 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import lgp.env.alfred.segmentation_definitions as segdef
-from lgp.env.alfred.alfred_subgoal import AlfredSubgoal
+import lgp.env.teach.segmentation_definitions as segdef
+from lgp.env.teach.teach_subgoal import TeachSubgoal
 
 
 class ActionPredictor(nn.Module):
     def __init__(self, dmodel, joint_prob=False):
         super().__init__()
-        self.num_types = AlfredSubgoal.get_action_type_space_dim()
+        self.num_types = TeachSubgoal.get_action_type_space_dim()
         self.num_args = segdef.get_num_objects() + 1
         self.joint_prob = joint_prob
         self.linear_a = nn.Linear(dmodel * 3, dmodel)

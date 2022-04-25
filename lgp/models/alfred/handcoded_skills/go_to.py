@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 from lgp.abcd.skill import Skill
 
-from lgp.env.alfred.alfred_action import AlfredAction
+from lgp.env.teach.teach_action import TeachAction
 
 from lgp.models.alfred.handcoded_skills.rotate_to_yaw import RotateToYawSkill
 from lgp.models.alfred.hlsm.hlsm_state_repr import AlfredSpatialStateRepr
@@ -279,7 +279,7 @@ class GoToSkill(Skill):
     def has_failed(self) -> bool:
         return False
 
-    def act(self, state_repr: AlfredSpatialStateRepr) -> AlfredAction:
+    def act(self, state_repr: AlfredSpatialStateRepr) -> TeachAction:
         self.count += 1
         occupancy_map_2d = state_repr.get_obstacle_map_2d()
         self.vin.set_occupancy_map(occupancy_map_2d) # There's only one channel
@@ -292,7 +292,7 @@ class GoToSkill(Skill):
         x_vx, y_vx, z_vx = state_repr.get_pos_xyz_vx()
         x_vx_q, y_vx_q = self.vin.remap_xy(x_vx, y_vx, state_repr.data.data.shape[2])
 
-        if self.prev_act == "MoveAhead":
+        if self.prev_act == "Forward":
             self.log_pos(self.prev_gridact, x_vx_q, y_vx_q)
 
         vb, vc, vh, vw = q_image.shape
@@ -324,7 +324,7 @@ class GoToSkill(Skill):
         # If reached the right place, rotate towards the object and stop
         if gridaction == "STOP":
             self.prev_act = "Stop"
-            return AlfredAction("Stop", AlfredAction.get_empty_argument_mask())
+            return TeachAction("Stop", TeachAction.get_empty_argument_mask())
         # Otherwise rotate in the direction according to the gridworld action, and then move forward
         else:
             target_yaw = {
@@ -337,8 +337,8 @@ class GoToSkill(Skill):
             rotate_action = self.rotate_to_yaw_skill.act(state_repr)
             if rotate_action.is_stop():
                 # This is needed to keep track of actions that move the agent
-                self.prev_act = "MoveAhead"
-                return AlfredAction("MoveAhead", AlfredAction.get_empty_argument_mask())
+                self.prev_act = "Forward"
+                return TeachAction("Forward", TeachAction.get_empty_argument_mask())
             else:
-                self.prev_act = "Rotate"
+                self.prev_act = "Turn"
                 return rotate_action

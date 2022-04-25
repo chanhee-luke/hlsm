@@ -9,9 +9,9 @@ def build_alfred_hierarchical_agent(agent_setup, hparams, device):
     from lgp.agents.hierarchical_agent import HierarchicalAgent
     from lgp.agents.action_proposal_agent import ActionProposalAgent
     # Import model factory
-    from lgp.models.alfred.hlsm.hlsm_model_factory import HlsmModelFactory
+    from lgp.models.teach.hlsm.hlsm_model_factory import HlsmModelFactory
     # Import classes
-    from lgp.env.alfred.alfred_action import AlfredAction
+    from lgp.env.teach.teach_action import TeachAction
     from lgp.models.alfred.hlsm.hlsm_task_repr import HlsmTaskRepr
 
     model_factory = HlsmModelFactory(hparams)
@@ -30,7 +30,7 @@ def build_alfred_hierarchical_agent(agent_setup, hparams, device):
     actprop.eval()
 
     highlevel_agent = ActionProposalAgent(actprop, obsfunc, HlsmTaskRepr, device)
-    hierarchical_agent = HierarchicalAgent(highlevel_agent, skillset, obsfunc, AlfredAction)
+    hierarchical_agent = HierarchicalAgent(highlevel_agent, skillset, obsfunc, TeachAction)
     return hierarchical_agent
 
 

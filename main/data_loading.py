@@ -15,6 +15,9 @@ def get_model_factory(env_type, hparams):
     if env_type == "Alfred":
         print("ALFRED enviornment")
         model_factory = HlsmModelFactory(hparams)
+    elif env_type == "Teach":
+        print("TEACh enviornment")
+        model_factory = HlsmModelFactory(hparams)
     else:
         raise ValueError(f"Unrecognized environment: {env_type}")
     return model_factory

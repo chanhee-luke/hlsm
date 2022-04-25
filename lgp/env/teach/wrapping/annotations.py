@@ -157,10 +157,11 @@ class TrajData:
     def get_task_description(self):
         #NOTE EDH does not have high level description so task description == step description
         #print("***USING TASK DESCRIPTION, ARE YOU SURE???***")
-        dialogues =  ' '.join(self.edh["dialog_history"][0])
-        print(dialogues)
-        return dialogues
-        #return self.game_data['tasks'][0]['desc']
+        tmp = []
+        for dialogue in self.edh["dialog_history"]:
+            sent = ': '.join(dialogue)
+            tmp.append(sent)
+        return '. '.join(tmp)
 
     def get_step_descriptions(self):
         # Dialogue history (Originally low level instruction in ALFRED) 

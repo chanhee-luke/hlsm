@@ -1,4 +1,4 @@
-#!/bin/bash
+#/bin/bash
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Change this to your desired directory:
@@ -16,4 +16,4 @@ export LGP_MODEL_DIR="${WS_DIR}/models"
 export LGP_DATA_DIR="${WS_DIR}/data"
 
 # TEACH specific
-export ET_DATA=/home/ubuntu/data
+export ET_DATA=/home/ubuntu/data/teach-dataset

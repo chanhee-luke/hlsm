@@ -17,30 +17,50 @@ class ForkedPdb(pdb.Pdb):
         finally:
             sys.stdin = _stdin
 
+# IDX_TO_ACTION_TYPE = {
+#     0: 'Stop',
+#     2: 'Forward',
+#     3: 'Backward',
+#     4: 'Turn Left',
+#     5: 'Turn Right',
+#     6: 'Look Up',
+#     7: 'Look Down',
+#     8: 'Pan Left',
+#     9: 'Pan Right',
+#     200: 'Pickup',
+#     201: 'Place',
+#     202: 'Open',
+#     203: 'Close',
+#     204: 'ToggleOn',
+#     205: 'ToggleOff',
+#     206: 'Slice',
+#     211: 'Pour'
+# }
+
 IDX_TO_ACTION_TYPE = {
     0: 'Stop',
-    2: 'Forward',
-    3: 'Backward',
-    4: 'Turn Left',
-    5: 'Turn Right',
-    6: 'Look Up',
-    7: 'Look Down',
-    8: 'Pan Left',
-    9: 'Pan Right',
-    200: 'Pickup',
-    201: 'Place',
-    202: 'Open',
-    203: 'Close',
-    204: 'ToggleOn',
-    205: 'ToggleOff',
-    206: 'Slice',
-    211: 'Pour'
+    1: 'Forward',
+    2: 'Backward',
+    3: 'Turn Left',
+    4: 'Turn Right',
+    5: 'Look Up',
+    6: 'Look Down',
+    7: 'Pan Left',
+    8: 'Pan Right',
+    9: 'Pickup',
+    10: 'Place',
+    11: 'Open',
+    12: 'Close',
+    13: 'ToggleOn',
+    14: 'ToggleOff',
+    15: 'Slice',
+    16: 'Pour'
 }
 
 # TODO: Reinstate Stop action as an action type
 
 ACTION_TYPE_TO_IDX = {v:k for k,v in IDX_TO_ACTION_TYPE.items()}
-ACTION_TYPES = list(IDX_TO_ACTION_TYPE.values())#[IDX_TO_ACTION_TYPE[i] for i in range(len(IDX_TO_ACTION_TYPE))] #TODO why this?
+ACTION_TYPES = [IDX_TO_ACTION_TYPE[i] for i in range(len(IDX_TO_ACTION_TYPE))]
 
 NAV_ACTION_TYPES = [
     'Forward',

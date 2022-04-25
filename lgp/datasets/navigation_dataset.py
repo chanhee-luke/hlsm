@@ -6,6 +6,8 @@ from typing import List, Dict, Union
 from lgp.abcd.dataset import ExtensibleDataset
 from lgp.rollout.rollout_data import load_rollout_from_path
 
+from lgp.env.teach.teach_subgoal import IDX_TO_ACTION_IDX
+
 
 class NavigationDataset(ExtensibleDataset):
 
@@ -31,6 +33,9 @@ class NavigationDataset(ExtensibleDataset):
         return outp
 
     def _process_example(self, example):
+        # tmp mapping
+        example["subgoal"].action_type = torch.tensor([IDX_TO_ACTION_IDX[int(example["subgoal"].action_type.item())]]) #FIXME tmp mapping
+
         f2d = example["features_2d"]
         simg = example["state_image"]
         b, c, h, w = f2d.shape
@@ -116,7 +121,7 @@ class NavigationDataset(ExtensibleDataset):
     # Inherited from lgp.abcd.dataset.ExtensibleDataset
     def collate_fn(self, list_of_examples: Union[List[Dict], List[List[Dict]]]) -> Dict:
         list_of_examples = [l for l in list_of_examples if l is not None]
-        print(len(list_of_examples))
+        # print(len(list_of_examples))
 
         state_images = [l["state_image_rel"] for l in list_of_examples]
         features_2d = [l["features_2d_rel"] for l in list_of_examples]

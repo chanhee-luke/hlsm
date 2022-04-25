@@ -1,4 +1,4 @@
-name: hlsm-alfred
+name: hlsm-teach
 channels:
   - pytorch
   - defaults

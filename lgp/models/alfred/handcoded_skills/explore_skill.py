@@ -7,10 +7,10 @@ from typing import Dict
 
 from lgp.abcd.skill import Skill
 
-import lgp.env.alfred.segmentation_definitions as segdef
+import lgp.env.teach.segmentation_definitions as segdef
 
-from lgp.env.alfred.alfred_action import AlfredAction
-from lgp.env.alfred.alfred_subgoal import AlfredSubgoal
+from lgp.env.teach.teach_action import TeachAction
+from lgp.env.teach.teach_subgoal import TeachSubgoal
 from lgp.models.alfred.hlsm.hlsm_state_repr import AlfredSpatialStateRepr
 from lgp.models.alfred.handcoded_skills.go_to import GoToSkill
 
@@ -106,11 +106,11 @@ class ExploreSkill(Skill):
         else:
             return False
 
-    def set_goal(self, hl_action : AlfredSubgoal):
+    def set_goal(self, hl_action : TeachSubgoal):
         self._reset()
         self.hl_action = hl_action
 
-    def act(self, state_repr: AlfredSpatialStateRepr) -> AlfredAction:
+    def act(self, state_repr: AlfredSpatialStateRepr) -> TeachAction:
         if self.rewardmap is None:
             self.rewardmap = self._construct_cost_function(state_repr)
             self.goto_skill.set_goal(self.rewardmap)
@@ -128,12 +128,12 @@ class ExploreSkill(Skill):
         # This costs very little, but can significantly improve the map representation between
         # failed navigation retries.
         if not self.pre_rotation_finished:
-            action : AlfredAction = AlfredAction(action_type="RotateLeft", argument_mask=None)
+            action : TeachAction = TeachAction(action_type="Turn Left", argument_mask=None)
             self.rotation_count += 1
             #if self.rotation_count == 1:
-            #    action : AlfredAction = AlfredAction(action_type="LookUp", argument_mask=None)
+            #    action : TeachAction = TeachAction(action_type="LookUp", argument_mask=None)
             if self.rotation_count == 3:
-                #action: AlfredAction = AlfredAction(action_type="LookDown", argument_mask=None)
+                #action: TeachAction = TeachAction(action_type="LookDown", argument_mask=None)
                 self.rotation_count = 0
                 self.pre_rotation_finished = True
 
@@ -142,7 +142,7 @@ class ExploreSkill(Skill):
             self.navigate_finished = True
             self.pre_rotation_finished = True
             self.post_rotation_finished = True
-            action = AlfredAction(action_type="Stop", argument_mask=None)
+            action = TeachAction(action_type="Stop", argument_mask=None)
 
         elif not self.navigate_finished:
             # Sample a non-stop action, unless the object is found or time limit exceeded
@@ -151,7 +151,7 @@ class ExploreSkill(Skill):
                 if self.rewardmap is None:
                     self.rewardmap = self._construct_cost_function(state_repr)
                     self.goto_skill.set_goal(self.rewardmap)
-                action : AlfredAction = self.goto_skill.act(state_repr)
+                action : TeachAction = self.goto_skill.act(state_repr)
                 if action.is_stop():
                     self.rewardmap = None
                     count += 1
@@ -163,21 +163,21 @@ class ExploreSkill(Skill):
 
         elif not self.post_rotation_finished:
             # First do 4x RotateLeft to look around
-            action : AlfredAction = AlfredAction(action_type="RotateLeft", argument_mask=None)
+            action : TeachAction = TeachAction(action_type="Turn Left", argument_mask=None)
             self.rotation_count += 1
 
             # Look up before rotating
             if self.rotation_count == 1:
-                action : AlfredAction = AlfredAction(action_type="LookUp", argument_mask=None)
+                action : TeachAction = TeachAction(action_type="Look Up", argument_mask=None)
 
             # Look back down after rotating
             if self.rotation_count == 5:
-                action: AlfredAction = AlfredAction(action_type="LookDown", argument_mask=None)
+                action: TeachAction = TeachAction(action_type="Look Down", argument_mask=None)
                 self.rotation_count = 0
                 self.post_rotation_finished = True
 
         else:
-            action = AlfredAction(action_type="Stop", argument_mask=None)
+            action = TeachAction(action_type="Stop", argument_mask=None)
 
         self.count += 1
         return action

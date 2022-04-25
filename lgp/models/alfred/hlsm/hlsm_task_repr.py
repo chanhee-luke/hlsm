@@ -6,10 +6,10 @@ from transformers import AutoTokenizer, AutoModel, PreTrainedTokenizer
 from lgp.abcd.repr.task_repr import TaskRepr
 from lgp.abcd.functions.task_repr_function import TaskReprFunction
 
-from lgp.env.alfred.tasks import AlfredTask
+from lgp.env.teach.tasks import TeachTask
 
 
-MAX_STRLEN = 50
+MAX_STRLEN = 450
 
 tokenizer = None
 
@@ -19,7 +19,9 @@ class HlsmTaskReprFunction(TaskReprFunction):
         super().__init__()
 
     def _make_tokenizer(self):
-        return AutoTokenizer.from_pretrained("bert-base-uncased")
+        tk = AutoTokenizer.from_pretrained("bert-base-uncased")
+        tk.truncation_side = "left"
+        return tk
 
     def _get_tokenizer(self) -> "PreTrainedTokenizer":
         global tokenizer
@@ -27,7 +29,7 @@ class HlsmTaskReprFunction(TaskReprFunction):
             tokenizer = self._make_tokenizer()
         return tokenizer
 
-    def forward(self, tasks: List[AlfredTask], device="cpu") -> "HlsmTaskRepr":
+    def forward(self, tasks: List[TeachTask], device="cpu") -> "HlsmTaskRepr":
         tokenizer = self._get_tokenizer()
         str_repr = [str(t) for t in tasks]
         if callable(tokenizer):
@@ -66,7 +68,7 @@ class HlsmTaskRepr(TaskRepr):
         return HlsmTaskRepr(self.data[item])
 
     @classmethod
-    def from_task(cls, task: AlfredTask, device="cpu") -> "HlsmTaskRepr":
+    def from_task(cls, task: TeachTask, device="cpu") -> "HlsmTaskRepr":
         return HlsmTaskReprFunction()(task, device)
 
     def __str__(self):

@@ -5,10 +5,10 @@ import torch
 import math
 from lgp.abcd.skill import Skill
 
-from lgp.env.alfred.alfred_observation import AlfredObservation
-from lgp.env.alfred.tasks import AlfredTask
-from lgp.env.alfred.alfred_action import AlfredAction, ACTION_TYPES
-from lgp.env.alfred.alfred_subgoal import AlfredSubgoal
+from lgp.env.teach.teach_observation import TeachObservation
+from lgp.env.teach.tasks import TeachTask
+from lgp.env.teach.teach_action import TeachAction, ACTION_TYPES
+from lgp.env.teach.teach_subgoal import TeachSubgoal
 from lgp.models.alfred.hlsm.hlsm_state_repr import AlfredSpatialStateRepr
 from lgp.models.alfred.handcoded_skills.rotate_to_yaw import RotateToYawSkill
 from lgp.models.alfred.handcoded_skills.tilt_to_pitch import TiltToPitchSkill
@@ -107,12 +107,12 @@ class GoForManualSkill(Skill):
     def has_failed(self) -> bool:
         return False
 
-    def set_goal(self, subgoal : AlfredSubgoal, remember_past_failures=False):
+    def set_goal(self, subgoal : TeachSubgoal, remember_past_failures=False):
         self._reset()
         self.subgoal = subgoal
         #self.trace["goal"] = self.goal.get_argument_mask()argument_mask.data
 
-    def act(self, state_repr: AlfredSpatialStateRepr) -> AlfredAction:
+    def act(self, state_repr: AlfredSpatialStateRepr) -> TeachAction:
         self.act_count += 1
         # Haven't yet gone to the goal position
         if not self.goto_done:
@@ -153,4 +153,4 @@ class GoForManualSkill(Skill):
                 return action
 
         # Finally, if finished going to the position and rotating, report "STOP
-        return AlfredAction(action_type="Stop", argument_mask=None)
+        return TeachAction(action_type="Stop", argument_mask=None)

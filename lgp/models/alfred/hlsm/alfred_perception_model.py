@@ -7,7 +7,7 @@ from lgp.abcd.model import LearnableModel
 from lgp.utils.viz import show_image
 from lgp.flags import GLOBAL_VIZ
 
-import lgp.env.alfred.segmentation_definitions as segdef
+import lgp.env.teach.segmentation_definitions as segdef
 
 from lgp.models.alfred.hlsm.unets.unet_5 import UNet5
 

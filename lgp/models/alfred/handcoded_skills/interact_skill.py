@@ -4,8 +4,8 @@ import torch
 
 from lgp.abcd.skill import Skill
 
-from lgp.env.alfred.alfred_action import AlfredAction
-from lgp.env.alfred.alfred_subgoal import AlfredSubgoal
+from lgp.env.teach.teach_action import TeachAction
+from lgp.env.teach.teach_subgoal import TeachSubgoal
 
 from lgp.abcd.action import Action
 from lgp.models.alfred.handcoded_skills.go_for import GoForSkill
@@ -84,8 +84,8 @@ class InteractSkill(Skill):
             self.trace["fpv_voxel_argument_mask"] = trace_stuff["fpv_voxel_argument_mask"]
             self.trace["fpv_semantic_argument_mask"] = trace_stuff["fpv_semantic_argument_mask"]
 
-    def set_goal(self, subgoal: AlfredSubgoal):
-        assert isinstance(subgoal, AlfredSubgoal)
+    def set_goal(self, subgoal: TeachSubgoal):
+        assert isinstance(subgoal, TeachSubgoal)
         prev_goal = copy.deepcopy(self.subgoal)
         self._reset()
         self.subgoal = subgoal
@@ -153,4 +153,4 @@ class InteractSkill(Skill):
                 return action
 
         # Finally, execute the stop action to end the skill and revert to the high-level policy
-        return AlfredAction("Stop", AlfredAction.get_empty_argument_mask())
+        return TeachAction("Stop", TeachAction.get_empty_argument_mask())

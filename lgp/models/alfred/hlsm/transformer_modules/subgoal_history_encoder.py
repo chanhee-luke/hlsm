@@ -4,9 +4,9 @@ import torch.nn as nn
 from lgp.models.alfred.hlsm.transformer_modules.positional_encodings import positional_encoding_1d_flat
 from lgp.models.alfred.hlsm.transformer_modules.transformer_layer import TransformerEncoderLayer
 
-from lgp.env.alfred.alfred_subgoal import AlfredSubgoal
+from lgp.env.teach.teach_subgoal import TeachSubgoal
 
-from lgp.env.alfred import segmentation_definitions as segdef
+from lgp.env.teach import segmentation_definitions as segdef
 
 from lgp.ops.misc import index_to_onehot
 
@@ -15,7 +15,7 @@ class SubgoalHistoryEncoder(nn.Module):
 
     def __init__(self, dmodel, ablate_no_acthist=False, ablate_no_posemb=False):
         super().__init__()
-        self.num_actions = AlfredSubgoal.get_action_type_space_dim()
+        self.num_actions = TeachSubgoal.get_action_type_space_dim()
         self.num_objects = segdef.get_num_objects()
         self.dim = dmodel
 
@@ -94,7 +94,17 @@ class SubgoalHistoryEncoder(nn.Module):
         if self.ablate_no_acthist:
             type_oh = torch.zeros_like(type_oh)
             arg_oh = torch.zeros_like(arg_oh)
-
+        # print("in forward")
+        # print(action_seq)
+        # print(type_oh)
+        # print(arg_oh)
+        # print(type_oh.shape)
+        # print(arg_oh.shape)
+        # print(type_oh.device)
+        # print(arg_oh.device)
+        # print(self.type_linear.in_features)
+        # print(self.type_linear.out_features)
+        # print("out forward")
         type_emb = self.type_linear(type_oh)
         arg_emb = self.arg_linear(arg_oh)
 

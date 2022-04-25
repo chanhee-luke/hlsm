@@ -2,8 +2,8 @@ from typing import Union
 import torch
 
 from lgp.abcd.functions.observation_function import ObservationFunction
-from lgp.env.alfred.alfred_observation import AlfredObservation
-from lgp.env.alfred.alfred_subgoal import AlfredSubgoal
+from lgp.env.teach.teach_observation import TeachObservation
+from lgp.env.teach.teach_subgoal import TeachSubgoal
 from lgp.models.alfred.hlsm.hlsm_state_repr import AlfredSpatialStateRepr
 
 from lgp.models.alfred.projection.image_to_voxels import ImageToVoxels
@@ -41,7 +41,7 @@ class HlsmObservationFunction(ObservationFunction):
     def clear_trace(self):
         self.trace = {}
 
-    def forward(self, observation: AlfredObservation, prev_state: Union[AlfredSpatialStateRepr, None], goal: Union[AlfredSubgoal, None]) -> AlfredSpatialStateRepr:
+    def forward(self, observation: TeachObservation, prev_state: Union[AlfredSpatialStateRepr, None], goal: Union[TeachSubgoal, None]) -> AlfredSpatialStateRepr:
         scene_image = observation.semantic_image
         depth_image = observation.depth_image
         hfov_deg = observation.hfov_deg

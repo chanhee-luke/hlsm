@@ -3,7 +3,7 @@ import math
 
 from lgp.abcd.skill import Skill
 from lgp.models.alfred.hlsm.hlsm_state_repr import AlfredSpatialStateRepr
-from lgp.env.alfred.alfred_action import AlfredAction
+from lgp.env.teach.teach_action import TeachAction
 
 
 class RotateToYawSkill(Skill):
@@ -35,7 +35,7 @@ class RotateToYawSkill(Skill):
     def has_failed(self) -> bool:
         return False
 
-    def act(self, state_repr : AlfredSpatialStateRepr) -> AlfredAction:
+    def act(self, state_repr : AlfredSpatialStateRepr) -> TeachAction:
         roll, pitch, yaw = state_repr.get_rpy()
         # Allow control error to be between -pi and +pi
         ctrl_diff = yaw - self.target_yaw
@@ -43,10 +43,10 @@ class RotateToYawSkill(Skill):
 
         # Rotate to the correct angle
         if ctrl_diff < -1e-2:
-            action_type = "RotateLeft"
+            action_type = "Turn Left"
         elif ctrl_diff > +1e-2:
-            action_type = "RotateRight"
+            action_type = "Turn Right"
         else:
             action_type = "Stop"
 
-        return AlfredAction(action_type=action_type, argument_mask=AlfredAction.get_empty_argument_mask())
+        return TeachAction(action_type=action_type, argument_mask=TeachAction.get_empty_argument_mask())

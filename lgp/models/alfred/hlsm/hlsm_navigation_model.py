@@ -11,7 +11,7 @@ from lgp.ops.spatial_distr import multidim_logsoftmax
 
 from lgp.utils.viz import show_image
 
-from lgp.env.alfred.alfred_subgoal import AlfredSubgoal
+from lgp.env.teach.teach_subgoal import TeachSubgoal
 
 from lgp.models.alfred.hlsm.hlsm_state_repr import AlfredSpatialStateRepr
 from lgp.models.alfred.hlsm.unets.lingunet_3 import Lingunet3
@@ -36,8 +36,8 @@ class HlsmNavigationModel(LearnableModel):
             in_channels=self.feature_2d_dim + self.action_2d_dim,
             context_size=self.hidden_dim,
             out_channels=out_channels)
-        self.act_type_emb = nn.Embedding(AlfredSubgoal.get_action_type_space_dim(), self.hidden_dim)
-        self.act_arg_emb = nn.Embedding(AlfredSubgoal.get_action_arg_space_dim() + 1, self.hidden_dim)
+        self.act_type_emb = nn.Embedding(TeachSubgoal.get_action_type_space_dim(), self.hidden_dim)
+        self.act_arg_emb = nn.Embedding(TeachSubgoal.get_action_arg_space_dim() + 1, self.hidden_dim)
         self.act_linear = nn.Linear(self.hidden_dim, self.hidden_dim)
 
         self.iter = nn.Parameter(torch.zeros([1]), requires_grad=False)
@@ -60,6 +60,21 @@ class HlsmNavigationModel(LearnableModel):
         lingin = torch.cat([features_2d, subgoal_arg_features], dim=1)
 
         # Action representation
+        
+        # print()
+        # print(subgoal_tensors.shape)
+        # print(subgoal_tensors)
+        # print(act_types.shape)
+        # print(self.act_type_emb.num_embeddings)
+        # print(self.act_type_emb.embedding_dim)
+        # print()
+
+        # tmp = self.act_type_emb(act_types)
+
+        # type_emb = self.act(tmp)
+        # arg_emb = self.act(self.act_arg_emb(act_args))
+        # act_emb = self.act_linear(type_emb + arg_emb)
+
         type_emb = self.act(self.act_type_emb(act_types))
         arg_emb = self.act(self.act_arg_emb(act_args))
         act_emb = self.act_linear(type_emb + arg_emb)

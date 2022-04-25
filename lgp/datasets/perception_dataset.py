@@ -4,7 +4,7 @@ from typing import List, Dict, Union
 
 from lgp.abcd.dataset import ExtensibleDataset
 
-from lgp.env.alfred.alfred_observation import AlfredObservation
+from lgp.env.teach.teach_observation import TeachObservation
 from lgp.rollout.rollout_data import load_rollout_from_path
 
 
@@ -24,6 +24,9 @@ class PerceptionDataset(ExtensibleDataset):
         return len(self.chunk_paths)
 
     def _process_example(self, example):
+        # tmp mapping
+        example["subgoal"].action_type = torch.tensor([IDX_TO_ACTION_IDX[int(example["subgoal"].action_type.item())]]) #FIXME tmp mapping
+
         observation = example["observation"]
 
         observation.data_augment()
@@ -38,7 +41,7 @@ class PerceptionDataset(ExtensibleDataset):
         list_of_examples = [l for l in list_of_examples if l is not None]
 
         observations = [l["observation"] for l in list_of_examples]
-        observations = AlfredObservation.collate(observations)
+        observations = TeachObservation.collate(observations)
 
         out = {
             "observations": observations
