@@ -1,5 +1,5 @@
-# HLSM
-This is the code repository for the paper [A Persistent Spatial Semantic Representation for High-level Natural Language Instruction Execution](https://arxiv.org/abs/2107.05612).
+# HLSM-Teach
+This is the code repository for the paper [A Persistent Spatial Semantic Representation for High-level Natural Language Instruction Execution](https://arxiv.org/abs/2107.05612). Adapted to TEACH
 
 ## Setup
 
@@ -7,8 +7,8 @@ Tested on Ubuntu 20.04.
 
 ### Setup Python Environment
 ```
-conda env create -f hlsm-alfred.yml
-conda activate hlsm-alfred
+conda env create -f hlsm-teach.yml
+conda activate hlsm-teach
 ```
 
 ### Setup Workspace
@@ -62,22 +62,22 @@ If you downloaded the models above, you can skip these training steps and procee
 
 1. Train the high-level controller (subgoal model) for 6 epochs:
 ```
-python main/train_supervised.py alfred/train_subgoal_model
+python main/train_supervised.py teach/train_subgoal_model
 ```
 
 2. Train the low-level controller's navigation model for 6 epochs:
 ```
-python main/train_supervised.py alfred/train_navigation_model
+python main/train_supervised.py teach/train_navigation_model
 ```
 
 3. Train the semantic segmentation model for 5 epochs:
 ```
-python main/train_supervised.py alfred/train_segmentation_model
+python main/train_supervised.py teach/train_segmentation_model
 ```
 
 4. Train the depth prediction model for 4 epochs:
 ```
-python main/train_supervised.py alfred/train_depth_model
+python main/train_supervised.py teach/train_depth_model
 ```
 
 Tensorboard summaries are written to `workspace_dir/data/runs`.
@@ -88,20 +88,20 @@ Call it with different configurations to evaluate on the different data splits.
 
 To evaluate on valid_unseen, run:
 ```
-python main/rollout_and_evaluate.py alfred/eval/hlsm_full/eval_hlsm_valid_unseen
+python main/rollout_and_evaluate.py teach/eval/hlsm_full/eval_hlsm_valid_unseen
 ```
 
 To evaluate on valid_seen, run:
 ```
-python main/rollout_and_evaluate.py alfred/eval/hlsm_full/eval_hlsm_valid_seen
+python main/rollout_and_evaluate.py teach/eval/hlsm_full/eval_hlsm_valid_seen
 ```
 
 To evaluate on both test splits and collect traces for leaderboard, run:
 ```
-python main/rollout_and_evaluate.py alfred/eval/hlsm_full/eval_hlsm_test
+python main/rollout_and_evaluate.py teach/eval/hlsm_full/eval_hlsm_test
 ```
 
-Explore the other configurations available at `experiment_definitions/alfred/eval`.
+Explore the other configurations available at `experiment_definitions/teach/eval`.
 
 
 **Expected results**:
