@@ -1,6 +1,6 @@
 {
   "@include": [
-    "alfred/env"
+    "teach/env"
   ],
 
   "Setup": {
@@ -14,7 +14,7 @@
     "save_checkpoint_file": "hlsm_segmentation_model",
     "load_checkpoint_file": null,
 
-    "experiment_name": "train_alfred_segmentation_model",
+    "experiment_name": "train_teach_segmentation_model",
 
     "dataset_type" : "perception",
     "model_type": "alfred_perception_model",
